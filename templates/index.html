@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Chatbot</h1>
+    <div id="chatbox">
+        <div id="messages"></div>
+        <input type="text" id="userInput" placeholder="Type your message..." autofocus />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+
+    <script>
+        const userId = Date.now().toString(); // Simple user identifier
+
+        function sendMessage() {
+            const userInput = document.getElementById("userInput");
+            const message = userInput.value.trim();
+            if (message === "") return;
+
+            displayMessage("You: " + message);
+            userInput.value = "";
+
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ user_id: userId, message: message })
+            })
+            .then(response => response.json())
+            .then(data => displayMessage("Bot: " + data.response))
+            .catch(error => console.error("Error:", error));
+        }
+
+        function displayMessage(text) {
+            const messagesDiv = document.getElementById("messages");
+            const messageElement = document.createElement("div");
+            messageElement.textContent = text;
+            messagesDiv.appendChild(messageElement);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
