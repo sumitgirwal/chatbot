@@ -37,41 +37,65 @@ async def chat(request: Request):
     # Step-by-step conversation flow
     if state["step"] == 0:
         state["step"] = 1
-        return JSONResponse({"response": "How can I assist you? Please tell me your problem.", "working": [1,2,3,4,45]})
+        return JSONResponse({"response": ["How can I assist you?", "Please tell me your problem."]})
 
     elif state["step"] == 1:
         if "fever" in message:
             state["step"] = 2
-            return JSONResponse({"response": "Your symptoms match with general physicians.\nAvailable doctors: Dr. A, Dr. B, Dr. C.\nPlease choose a doctor."})
+            return JSONResponse({"response": [
+                "Your symptoms match with general physicians.",
+                "Available doctors: Dr. A, Dr. B, Dr. C.",
+                "Please choose a doctor."
+            ]})
         else:
-            return JSONResponse({"response": "I can only assist with fever cases currently. Please specify 'fever'."})
+            return JSONResponse({"response": [
+                "I can only assist with fever cases currently.",
+                "Please specify 'fever' to proceed."
+            ]})
 
     elif state["step"] == 2:
         if "dr a" in message or "dr b" in message or "dr c" in message:
             state["doctor"] = message
             state["step"] = 3
-            return JSONResponse({"response": f"{message.title()} is available at 10:00 PM Monday. Please confirm the time."})
+            return JSONResponse({"response": [
+                f"{message.title()} is available at 10:00 PM Monday.",
+                "Please confirm the time."
+            ]})
         else:
-            return JSONResponse({"response": "Please choose between Dr. A, Dr. B, or Dr. C."})
+            return JSONResponse({"response": [
+                "Please choose between Dr. A, Dr. B, or Dr. C."
+            ]})
 
     elif state["step"] == 3:
         if "10:00 pm monday" in message:
             state["time"] = "10:00 PM Monday"
             state["step"] = 4
-            return JSONResponse({"response": "Please provide your name."})
+            return JSONResponse({"response": [
+                "Please provide your name."
+            ]})
         else:
-            return JSONResponse({"response": "Please confirm the time as '10:00 PM Monday'."})
+            return JSONResponse({"response": [
+                "Please confirm the time as '10:00 PM Monday'."
+            ]})
 
     elif state["step"] == 4:
         state["name"] = message
         state["step"] = 5
-        return JSONResponse({"response": "Please provide your phone number."})
+        return JSONResponse({"response": [
+            "Please provide your phone number."
+        ]})
 
     elif state["step"] == 5:
         state["phone"] = message
         save_appointment(state["name"], state["phone"], state["doctor"], state["time"])
         del user_states[user_id]  # Clear state after completion
-        return JSONResponse({"response": f"Your appointment is confirmed with {state['doctor'].title()} at {state['time']}. Thank you!"})
+        return JSONResponse({"response": [
+            f"Your appointment is confirmed with {state['doctor'].title()} at {state['time']}.",
+            "Thank you for using our service!"
+        ]})
 
     else:
-        return JSONResponse({"response": "Sorry, something went wrong. Let's start over."})
+        return JSONResponse({"response": [
+            "Sorry, something went wrong.",
+            "Let's start over."
+        ]})

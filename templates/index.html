@@ -17,31 +17,41 @@
     <script>
         const userId = Date.now().toString(); // Simple user identifier
 
-        function sendMessage() {
-            const userInput = document.getElementById("userInput");
-            const message = userInput.value.trim();
-            if (message === "") return;
+// Function to send a message to the backend
+function sendMessage() {
+    const userInput = document.getElementById("userInput");
+    const message = userInput.value.trim();
+    if (message === "") return;
 
-            displayMessage("You: " + message);
-            userInput.value = "";
+    displayMessage("You: " + message);
+    userInput.value = "";
 
-            fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ user_id: userId, message: message })
-            })
-            .then(response => response.json())
-            .then(data => displayMessage("Bot: " + data.response))
-            .catch(error => console.error("Error:", error));
+    fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: userId, message: message })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (Array.isArray(data.response)) {
+            // If the response is an array, display each message
+            data.response.forEach(msg => displayMessage("Bot: " + msg));
+        } else {
+            // Fallback for single responses
+            displayMessage("Bot: " + data.response);
         }
+    })
+    .catch(error => console.error("Error:", error));
+}
 
-        function displayMessage(text) {
-            const messagesDiv = document.getElementById("messages");
-            const messageElement = document.createElement("div");
-            messageElement.textContent = text;
-            messagesDiv.appendChild(messageElement);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
+// Function to display messages in the chat window
+function displayMessage(text) {
+    const messagesDiv = document.getElementById("messages");
+    const messageElement = document.createElement("div");
+    messageElement.textContent = text;
+    messagesDiv.appendChild(messageElement);
+    messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
     </script>
 </body>
 </html>
